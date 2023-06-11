@@ -7,6 +7,14 @@ from read import play, display
 
 VOICE = "en-GB-SoniaNeural"
 
+rep = {
+	'\n': ' ',
+	'%NEWLINE%': '\n',
+	'ﬁ': 'fi',
+	'ﬀ': 'ff',
+	'ﬃ': 'ffi',
+}
+
 async def synth(text, n) -> None:
 	OUTPUT = f"page-{n}.mp3"
 	SUBS = f"page-{n}.vtt"
@@ -30,17 +38,31 @@ with open("cosmos.pdf", "rb") as pdf:
 pRange = input(f"Pick reading range (1-{len(pages)}): ")
 first, last  = [int(x) for x in pRange.split('-')]
 
-#change
+selec = {}
+for pg in range(first, last+1):
+	text = pages[pg-1].replace('\n\n', '%NEWLINE%') # preserve paragraphs
+	for key, val in rep.items(): # Format + ligature fix
+		text = text.replace(key, val)
+
+	clean = ""
+	# Catch most headers, subtitles, & text fragments
+	for line in text.splitlines():
+		words = line.count(' ') + 1
+		if words < 6: continue
+		if words and words < 12 and line[-1] != '.': continue
+		clean += line.strip() + '\n\n'
+	selec[pg] = clean
+
 
 loop = asyncio.get_event_loop_policy().get_event_loop()
 try:
 	print("Synthesizing:")
-	for pg in range(first, last+1):
+	for pg, text in selec.items():
 		if isfile(f"page-{pg}.mp3"):
 			print(f"   #{pg}    *")
 			continue
-		loop.run_until_complete(synth(pages[pg-1], pg))
-	for pg in range(first, last+1):
+		loop.run_until_complete(synth(text, pg))
+	for pg in selec.keys():
 		print(f"\n\n{pg}", "—"*60, "\n")
 		threads = []
 		threads.append(Thread(target=play, args=(pg,) ))
