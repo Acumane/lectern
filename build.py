@@ -9,7 +9,7 @@ VOICE = "en-GB-SoniaNeural"
 
 rep = {
 	'\n': ' ',
-	'%NEWLINE%': '\n',
+	'%P%': '\n',
 	'ﬁ': 'fi',
 	'ﬀ': 'ff',
 	'ﬃ': 'ffi',
@@ -40,7 +40,7 @@ first, last  = [int(x) for x in pRange.split('-')]
 
 selec = {}
 for pg in range(first, last+1):
-	text = pages[pg-1].replace('\n\n', '%NEWLINE%') # preserve paragraphs
+	text = pages[pg-1].replace('\n\n', '%P%') # preserve paragraphs
 	for key, val in rep.items(): # Format + ligature fix
 		text = text.replace(key, val)
 
@@ -62,11 +62,11 @@ try:
 			print(f"   #{pg}    *")
 			continue
 		loop.run_until_complete(synth(text, pg))
-	for pg in selec.keys():
+	for pg, text in selec.items():
 		print(f"\n\n{pg}", "—"*60, "\n")
 		threads = []
 		threads.append(Thread(target=play, args=(pg,) ))
-		threads.append(Thread(target=asyncio.run, args=(display(pg), ) ))
+		threads.append(Thread(target=asyncio.run, args=(display(text, pg), ) ))
 		
 		for t in threads: t.start() # Start both threads
 		for t in threads: t.join()  # Wait for them (page) to finish
