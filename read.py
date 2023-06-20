@@ -8,7 +8,7 @@ def convertTime(timestamp):
 	hours, minutes, seconds = map(float, timestamp.split(':'))
 	return hours * 3600 + minutes * 60 + seconds
 
-async def printer(delay, caption, word):
+async def printer(delay, word):
 	await asyncio.sleep(delay)
 	if word == "%P%": print("\n", end="\t")
 	else: print(word, end=' ', flush=True)
@@ -17,17 +17,15 @@ def play(pg):
 	playsound(f'page-{pg}.mp3')
 
 async def display(text, pg):
-	text = text.replace("\n\n", " %P% ")
-	words = deque(text.split())
-	print("\t", end='')
-	with open(f'page-{pg}.vtt', 'r') as f:
-		next(f); next(f) # Skip first 2 lines
-		tasks = []
-		for line in f: # parsing VTT subtitles
-			time, _ = line.split(' --> ')
-			start = convertTime(time)
-			caption = next(f).strip(); next(f)
-			# next(f); next(f) # Skip to next timestamp
-			tasks.append(printer(start, caption, words.popleft()))
+	pass # out of commision!
+	# text = text.replace("\n\n", " %P% ")
+	# words = deque(text.split())
+	# # print(text)
+	# print("\t", end='')
+	# with open(f'page-{pg}', 'r') as f:
+	# 	tasks = []
+	# 	for time in f:
+	# 		start = convertTime(time)
+	# 		tasks.append(printer(start, words.popleft()))
 
-		await asyncio.gather(*tasks)
+	# 	await asyncio.gather(*tasks)

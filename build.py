@@ -4,6 +4,8 @@ import edge_tts
 from os.path import isfile
 from threading import Thread
 from read import play, display
+from collections import deque
+import prompts as p
 
 VOICE = "en-GB-SoniaNeural"
 
@@ -17,19 +19,22 @@ rep = {
 
 async def synth(text, n) -> None:
 	OUTPUT = f"page-{n}.mp3"
-	SUBS = f"page-{n}.vtt"
-	submaker = edge_tts.SubMaker()
+	SUBS = f"page-{n}"
+	prompt = p.SubMaker()
 	communicate = edge_tts.Communicate(text, VOICE, rate="+60%")
+	text = text.replace("\n\n", " %P% ")
+	prompt.puncted = deque(text.split())
 	print(f"   #{n}...", end=' ', flush=True)
 	with open(OUTPUT, "wb") as file:
 		async for chunk in communicate.stream():
 			if chunk["type"] == "audio":
 				file.write(chunk["data"])
 			elif chunk["type"] == "WordBoundary":
-				submaker.create_sub((chunk["offset"], chunk["duration"]), chunk["text"])
+				prompt.times.append(chunk["offset"])
+				prompt.plain.append(chunk["text"])
 
 	with open(SUBS, "w", encoding="utf-8") as file:
-		file.write(submaker.generate_subs(1))
+		file.write(prompt.generate_subs())
 	print("\N{check mark}")
 
 with open("cosmos.pdf", "rb") as pdf:

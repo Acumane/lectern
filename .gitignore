@@ -1,6 +1,7 @@
 .venv
 *.vtt
 *.mp3
+page-*
 pages*/
 parts*/
 *.pdf
