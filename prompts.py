@@ -5,18 +5,12 @@ from collections import deque
 
 
 def formatter(t: float, pl: str, pu: str) -> str:
+	time = (t / 10**7)
 	return (
-		f"{timestamp(t)}\n"
-		f"{pl}\n"
-		f"{pu}\n\n"
+		f"{time:.3f}\n"
+		# f"{pl}\n"
+		f"{pu}\n"
 	)
-
-def timestamp(time: float) -> str:
-	hour = math.floor(time / 10**7 / 3600)
-	minute = math.floor((time / 10**7 / 60) % 60)
-	seconds = (time / 10**7) % 60
-	return f"{hour:02d}:{minute:02d}:{seconds:06.3f}"
-
 
 class SubMaker:
 	def __init__(self):
@@ -24,13 +18,8 @@ class SubMaker:
 		self.plain = deque()
 		self.puncted = deque()
 
-	def create_sub(self, time):
-		self.times.append(time[0])
-
 	def generate_subs(self) -> str:
-		print('')
-		data = ""
-		nSkips = 0
+		data = ""; nSkips = 0
 		for t in self.times:
 			pl = self.plain.popleft(); pu = "%NONE%"
 			if nSkips: # Do the skipping
@@ -45,10 +34,10 @@ class SubMaker:
 				pu = self.puncted.popleft()
 				unpu = ''.join(c for c in pu if c.isalnum()) # remove punct. for comparison
 				if (pl != unpu):
-					print(f'\tInconsistent ("{pl}" vs. "{pu}")')
+					# print(f'\tInconsistent ("{pl}" vs. "{pu}")')
 					group = pl.split()
 					if len(group) > 1: # Case 1: many become one 
-						for g in group[1:]:
+						for _ in group[1:]:
 							pu += ' ' + self.puncted.popleft()
 					# Case 2: one becomes many
 					elif nSkips == 0:  # Find how many we must skip:
@@ -57,9 +46,6 @@ class SubMaker:
 							if pn == next:
 								nSkips = i-1; break
 
-				if self.puncted[0] == "%P%":
-					pu += r"\n\n"
-					self.puncted.popleft()
 			data += formatter(t, pl, pu) 
 
 		return data

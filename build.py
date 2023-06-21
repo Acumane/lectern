@@ -11,7 +11,7 @@ VOICE = "en-GB-SoniaNeural"
 
 rep = {
 	'\n': ' ',
-	'%P%': '\n',
+	'%¶%': '\n',
 	'ﬁ': 'fi',
 	'ﬀ': 'ff',
 	'ﬃ': 'ffi',
@@ -22,7 +22,7 @@ async def synth(text, n) -> None:
 	SUBS = f"page-{n}"
 	prompt = p.SubMaker()
 	communicate = edge_tts.Communicate(text, VOICE, rate="+60%")
-	text = text.replace("\n\n", " %P% ")
+	text = text.replace("\n\n", "%¶% ")
 	prompt.puncted = deque(text.split())
 	print(f"   #{n}...", end=' ', flush=True)
 	with open(OUTPUT, "wb") as file:
@@ -45,7 +45,7 @@ first, last  = [int(x) for x in pRange.split('-')]
 
 selec = {}
 for pg in range(first, last+1):
-	text = pages[pg-1].replace('\n\n', '%P%') # preserve paragraphs
+	text = pages[pg-1].replace('\n\n', '%¶%') # preserve paragraphs
 	for key, val in rep.items(): # Format + ligature fix
 		text = text.replace(key, val)
 
@@ -71,7 +71,7 @@ try:
 		print(f"\n\n{pg}", "—"*60, "\n")
 		threads = []
 		threads.append(Thread(target=play, args=(pg,) ))
-		threads.append(Thread(target=asyncio.run, args=(display(text, pg), ) ))
+		threads.append(Thread(target=asyncio.run, args=(display(pg), ) ))
 		
 		for t in threads: t.start() # Start both threads
 		for t in threads: t.join()  # Wait for them (page) to finish
