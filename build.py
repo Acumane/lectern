@@ -68,7 +68,7 @@ try:
 			continue
 		loop.run_until_complete(synth(text, pg))
 	for pg, text in selec.items():
-		print(f"\n\n{pg}", "—"*60, "\n")
+		print(f"\n\n{pg}", "\033[9m⠀"*75, "\033[0m", "\n")
 		threads = []
 		threads.append(Thread(target=play, args=(pg,) ))
 		threads.append(Thread(target=asyncio.run, args=(display(pg), ) ))

@@ -1,10 +1,11 @@
 import asyncio
+from bionic import bionify
 from playsound import playsound
 
 async def printer(delay, word):
 	await asyncio.sleep(delay)
 	if "%¶%" in word: print(word[:-3], end='\n\n\t')
-	else: print(word, end=' ', flush=True)
+	else: print(bionify(word), end=' ', flush=True)
 
 def play(pg):
 	playsound(f'page-{pg}.mp3')
