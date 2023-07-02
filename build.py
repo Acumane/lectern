@@ -1,9 +1,8 @@
 import pdftotext
 import asyncio
 import edge_tts
+from read import read
 from os.path import isfile
-from threading import Thread
-from read import play, display
 from collections import deque
 import prompts as p
 
@@ -14,6 +13,7 @@ rep = {
 	'%¶%': '\n',
 	'ﬁ': 'fi',
 	'ﬀ': 'ff',
+	'ﬂ': 'fl',
 	'ﬃ': 'ffi',
 }
 
@@ -67,14 +67,9 @@ try:
 			print(f"   #{pg}    *")
 			continue
 		loop.run_until_complete(synth(text, pg))
-	for pg, text in selec.items():
-		print(f"\n\n{pg}", "\033[9m⠀"*75, "\033[0m", "\n")
-		threads = []
-		threads.append(Thread(target=play, args=(pg,) ))
-		threads.append(Thread(target=asyncio.run, args=(display(pg), ) ))
-		
-		for t in threads: t.start() # Start both threads
-		for t in threads: t.join()  # Wait for them (page) to finish
+	for pg in selec:
+		read(pg)
+
 
 finally:
 	loop.close()
