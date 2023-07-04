@@ -8,8 +8,8 @@ def formatter(t: float, pl: str, pu: str) -> str:
 	time = (t / 10**7)
 	return (
 		f"{time:.3f}\n"
-		# f"{pl}\n"
 		f"{pu}\n"
+		f"{pl}\n\n"
 	)
 
 class SubMaker:
@@ -21,7 +21,7 @@ class SubMaker:
 	def generate_subs(self) -> str:
 		data = ""; nSkips = 0
 		for t in self.times:
-			pl = self.plain.popleft(); pu = "%NONE%"
+			pl = self.plain.popleft(); pu = ''
 			if nSkips: # Do the skipping
 				nSkips -= 1
 				continue
@@ -38,7 +38,11 @@ class SubMaker:
 					group = pl.split()
 					if len(group) > 1: # Case 1: many become one 
 						for _ in group[1:]:
-							pu += ' ' + self.puncted.popleft()
+							pu += ' ' + self.puncted.popleft()	
+					elif not unpu: # stranded punctuation
+						pu = self.puncted.popleft()
+					elif pu[0] == '\\': # broken math symbol:
+						pu = pl
 					# Case 2: one becomes many
 					elif nSkips == 0:  # Find how many we must skip:
 						next = ''.join(c for c in self.puncted[0] if c.isalnum())

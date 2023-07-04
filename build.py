@@ -1,5 +1,6 @@
 import pdftotext
 import asyncio
+import sys
 import edge_tts
 from read import read
 from os.path import isfile
@@ -37,39 +38,45 @@ async def synth(text, n) -> None:
 		file.write(prompt.generate_subs())
 	print("\N{check mark}")
 
-with open("cosmos.pdf", "rb") as pdf:
-	pages = pdftotext.PDF(pdf)
+if __name__ == "__main__":
+	if len(sys.argv) != 3:
+		print("\033[91mInsufficient arguments!\nRequires a <path/to/*.pdf> and range: <first>-<last>")
+		exit()
+	path, pRange = sys.argv[1:]
+	# speed = sys.argv[4] if len(sys.argv) > 3 else 1.0
+	
+	with open(path, "rb") as pdf:
+		pages = pdftotext.PDF(pdf)
 
-pRange = input(f"Pick reading range (1-{len(pages)}): ")
-first, last  = [int(x) for x in pRange.split('-')]
+	first, last  = [int(x) for x in pRange.split('-')]
 
-selec = {}
-for pg in range(first, last+1):
-	text = pages[pg-1].replace('\n\n', '%¶%') # preserve paragraphs
-	for key, val in rep.items(): # Format + ligature fix
-		text = text.replace(key, val)
+	selec = {}
+	for pg in range(first, last+1):
+		text = pages[pg-1].replace('\n\n', '%¶%') # preserve paragraphs
+		for key, val in rep.items(): # Format + ligature fix
+			text = text.replace(key, val)
 
-	clean = ""
-	# Catch most headers, subtitles, & text fragments
-	for line in text.splitlines():
-		words = line.count(' ') + 1
-		if words < 6: continue
-		if words and words < 12 and line[-1] != '.': continue
-		clean += line.strip() + '\n\n'
-	selec[pg] = clean
-
-
-loop = asyncio.get_event_loop_policy().get_event_loop()
-try:
-	print("Synthesizing:")
-	for pg, text in selec.items():
-		if isfile(f"page-{pg}.mp3"):
-			print(f"   #{pg}    *")
-			continue
-		loop.run_until_complete(synth(text, pg))
-	for pg in selec:
-		read(pg)
+		clean = ""
+		# Catch most headers, subtitles, & text fragments
+		for line in text.splitlines():
+			words = line.count(' ') + 1
+			if words < 6: continue
+			if words and words < 12 and line[-1] != '.': continue
+			clean += line.strip() + '\n\n'
+		selec[pg] = clean
 
 
-finally:
-	loop.close()
+	loop = asyncio.get_event_loop_policy().get_event_loop()
+	try:
+		print("Synthesizing:")
+		for pg, text in selec.items():
+			if isfile(f"page-{pg}.mp3"):
+				print(f"   #{pg}    *")
+				continue
+			loop.run_until_complete(synth(text, pg))
+		for pg, text in selec.items():
+			# print(text)
+			read(pg)
+
+	finally:
+		loop.close()
