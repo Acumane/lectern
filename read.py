@@ -39,9 +39,9 @@ def parse(pg):
 			prompts.append((float(time), word))
 			prev = float(time)
 
-def read(pg) -> bool:
+async def read(pg) -> bool:
 	if stop: return False
-	print(f"\n\n{pg}", "\033[9m⠀"*(cols-5), "\033[0m", "\n")
+	print(f"{pg}", "\033[9m⠀"*(cols-5), "\033[0m", "\n")
 	parse(pg)
 
 	t1 = Worker(p.play)
