@@ -1,4 +1,5 @@
 # Modified blixuk/bionic.py
+import ansi as a
 
 F = 2.4 # fixation factor
 
@@ -8,12 +9,6 @@ def fixate(word: str) -> int:
 	return fixation if fixation else 1
 
 def bionify(word: str) -> str:
-	if '-' in word:
-		a, b = word.split('-')
-
-		a = f"\033[01m{a[:fixate(a)]}\033[0m{a[fixate(a):]}"
-		b = f"\033[01m{b[:fixate(b)]}\033[0m{b[fixate(b):]}"
-		
-		return f"{a}-{b}"
-	else:
-		return f"\033[01m{word[:fixate(word)]}\033[0m{word[fixate(word):]}"
+		parts = word.split('-')
+		bolded = [f"{a.B}{p[:fixate(p)]}{a.O}{p[fixate(p):]}" for p in parts]
+		return '-'.join(bolded)

@@ -6,23 +6,24 @@ from os.path import basename, splitext, isfile, exists
 from build import clean, synth
 from read import read
 from sys import argv
+import ansi as a
 
 pages = {}
-done = False
-waiting = False
+stopped = waiting = False
 
 async def spin():
 	print(end='\n', flush=True)
 	spinner = cycle(['—', '/', '|', '\\'])
 	while waiting:
-		print(end=next(spinner), flush=True)
+		print(end=f"{a.I}{next(spinner)}{a.O}", flush=True)
 		print(end='\b\b')
 		await sleep(0.15)
-	print("\033[93m\N{check mark}\033[0m")
+	if not stopped:
+		print(f"{a.I}\N{check mark}{a.O}")
 
 async def main():
 	if len(argv) != 3:
-		print("\033[91mInsufficient arguments!\
+		print(f"{a.E}Insufficient arguments!\
 		\nRequires a <path/to/*.pdf> and range: <first>-<last>")
 		exit()
 
@@ -32,9 +33,9 @@ async def main():
 	# speed = argv[4] if len(argv) > 3 else 1.0
 
 	if ext != ".pdf":
-		print("\033[91mFile must be a PDF!"); exit()
+		print(f"{a.E}File must be a PDF!"); exit()
 	if not isfile(path):
-		print("\033[91mFile on path does not exist!"); exit()
+		print(f"{a.E}File on path does not exist!"); exit()
 
 	with open(path, "rb") as pdf:
 		raw = pdftotext.PDF(pdf)
@@ -46,12 +47,12 @@ async def main():
 		else: first, last = [int(x) for x in selec.split('-')]
 
 		if last > len(raw) or first < 1 or last < 1:
-			print(f"\033[91mOut of range! (1-{len(raw)})"); exit()
+			print(f"{a.E}Out of range! (1-{len(raw)})"); exit()
 		if first > last:
 			tmp = first; first = last; last = tmp
 
 	except ValueError:
-		print("\033[91mPages must be positive integers!"); exit()
+		print(f"{a.E}Pages must be positive integers!"); exit()
 	
 	if not exists(name): mkdir(name)
 	chdir(name)
@@ -68,12 +69,11 @@ async def main():
 		global waiting; waiting = True
 		spinner = start(spin())
 		await tasks[pg]
-		waiting = False
-		await spinner
-		global done; done = await read(pg)
+		waiting = False; await spinner
+		global stopped; stopped = await read(pg)
 
-	if done: print("\033[93m[DONE]\033[0m")
-	else: print("\033[93m[QUIT]\033[0m")
+	if stopped: print(f"{a.I}[QUIT]{a.O}")
+	else: print(f"{a.I}[DONE]{a.O}")
 
 if __name__ == "__main__":
 	run(main())

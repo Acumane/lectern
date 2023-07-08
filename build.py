@@ -1,6 +1,7 @@
 import edge_tts
 from os.path import isfile
 from collections import deque
+from pathlib import Path
 import prompts as p
 
 VOICE = "en-GB-SoniaNeural"
@@ -15,16 +16,23 @@ rep = {
 }
 
 async def synth(pg, text) -> None:
-	if isfile(f"page-{pg}.mp3"): return
-	OUTPUT = f"page-{pg}.mp3"
+	AUDIO = f"page-{pg}.mp3"
 	SUBS = f"page-{pg}"
-	prompt = p.SubMaker()
 
+	if isfile(f"page-{pg}.mp3"): # Skip if exists
+		with open(SUBS, "r") as file:
+			file.seek(0, 0)
+			if file.readline() != "*": return
+
+	if not text: # Skip if empty
+		Path(SUBS).touch(); return
+
+	prompt = p.SubMaker()
 	communicate = edge_tts.Communicate(text, VOICE, rate="+60%")
 	text = text.replace("\n\n", "%¶% ")
 	prompt.puncted = deque(text.split())
 
-	with open(OUTPUT, "wb") as file:
+	with open(AUDIO, "wb") as file:
 		async for chunk in communicate.stream():
 			if chunk["type"] == "audio":
 				file.write(chunk["data"])
@@ -34,6 +42,8 @@ async def synth(pg, text) -> None:
 
 	with open(SUBS, "w", encoding="utf-8") as file:
 		file.write(prompt.generate_subs())
+		file.seek(0, 0)
+		file.write("*")
 	return
 
 def clean(raw, pg):

@@ -19,7 +19,8 @@ class SubMaker:
 		self.puncted = deque()
 
 	def generate_subs(self) -> str:
-		data = ""; nSkips = 0
+		# replace ~ with * when writing complete
+		data = "~\n"; nSkips = 0
 		for t in self.times:
 			pl = self.plain.popleft(); pu = ''
 			if nSkips: # Do the skipping
