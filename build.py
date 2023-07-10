@@ -3,8 +3,7 @@ from os.path import isfile
 from collections import deque
 from pathlib import Path
 import prompts as p
-
-VOICE = "en-GB-SoniaNeural"
+import conf
 
 rep = {
 	'\n': ' ',
@@ -28,7 +27,7 @@ async def synth(pg, text) -> None:
 		Path(SUBS).touch(); return
 
 	prompt = p.SubMaker()
-	communicate = edge_tts.Communicate(text, VOICE, rate="+60%")
+	communicate = edge_tts.Communicate(text, conf.VOICE, rate=conf.RATE)
 	text = text.replace("\n\n", "%¶% ")
 	prompt.puncted = deque(text.split())
 
