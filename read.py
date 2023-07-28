@@ -8,12 +8,12 @@ from pynput.keyboard import Key, Listener
 import ansi as a
 
 cols, _ = get_terminal_size(0)
-stopped = skipped = False
+stopped = skipped = playing = False
 prompts = deque()
 p = MPV()
 
 def printer():
-	global stopped, skipped
+	global stopped, skipped, playing
 	print(end='\t')
 	time, word = prompts.popleft()
 	while True:
@@ -23,9 +23,14 @@ def printer():
 			print(f"\t{a.I}[SKIPPED]{a.O}")
 			skipped = False; return
 		cur_time = p.time_pos
-		if cur_time is None: continue
-
+		# if cur_time is None and playing: # Ends too early
+		# 	# TODO: dump remaining prompts 
+		# 	print(len(prompts))
+		# 	# print(prompts)
+		# 	retun
+		if cur_time is None: continue # Starts too early
 		if cur_time >= time:
+			# playing = True
 			if "%¶%" in word: print(word[:-3], end='\n\n\t')
 			else: print(bionify(word), end=' ', flush=True)
 			if prompts:
@@ -33,7 +38,6 @@ def printer():
 			else: # End of page
 				sleep(0.5) # Natural pause
 				return
-
 def parse(pg) -> bool:
 
 	if not getsize(f'page-{pg}'): # Skip empty pages

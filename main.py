@@ -66,13 +66,15 @@ async def main():
 	}
 
 	for pg in tasks:
-		global waiting; waiting = True
-		spinner = start(spin())
-		await tasks[pg]
-		waiting = False; await spinner
-		global stopped; stopped = await read(pg)
+		global stopped, waiting
+		waiting = True
+		if not stopped:
+			spinner = start(spin())
+			await tasks[pg]
+			waiting = False; await spinner
+			stopped = await read(pg)
 
-	if stopped: print(f"{a.I}[QUIT]{a.O}")
+	if stopped: print(f"\n{a.I}[QUIT]{a.O}")
 	else: print(f"{a.I}[DONE]{a.O}")
 
 if __name__ == "__main__":
