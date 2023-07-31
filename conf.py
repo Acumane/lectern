@@ -20,4 +20,3 @@ with open("lec.conf", "r") as conf:
 			NEW = True if val.title() == "True" else False
 	
 	print(f"Using voice {VOICE} at {RATE} speed.")
-	print(f"Bionic: {BIONIC} | Welcome: {NEW}")

@@ -1,0 +1,6 @@
+edge-tts==6.1.6
+pdftotext==2.2.2
+playsound
+pythreadworker==0.10.0
+pynput
+mpv
